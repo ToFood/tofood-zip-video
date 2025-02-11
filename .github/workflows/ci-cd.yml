@@ -87,28 +87,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        
-  configure-aws-credential:
-    name: 🐋 -> 🌐 AWS Credentials
-    runs-on: ubuntu-latest
-    needs: [unitary-test, integration-test, system-test]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
 
   deploy-image:
-    name: 🐋 -> 🌐 Deploy Image
+    name: 📦 Deploy Image
     runs-on: ubuntu-latest
-    needs: [unitary-test, integration-test, system-test, configure-aws-credential]
+    needs: [unitary-test, integration-test, system-test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -130,9 +113,9 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-project:
-    name: 🐋 -> 🌐 Deploy Project
+    name: 🚀 Deploy Project
     runs-on: ubuntu-latest
-    needs: [unitary-test, integration-test, system-test, deploy-image, configure-aws-credential]
+    needs: [deploy-image]
 
     steps:
       - name: Checkout code
